@@ -1,6 +1,16 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib import axes
+
+
+def plot_cost_history(learning_rate: float, cost_history: np.ndarray, ax: axes) -> None:
+    """Plots the cost history on the given axes.
+
+    Args:
+        cost_history (np.ndarray): Array of cost values.
+        ax (axes): Axes object to plot on.
+    """
+    (line,) = ax.plot(cost_history)
+    line.set_label(f"$\\alpha$ = 1e{learning_rate}")
 
 
 def initialize_parameters(n_x: int, n_y: int) -> tuple[np.ndarray, np.ndarray]:
@@ -13,7 +23,7 @@ def initialize_parameters(n_x: int, n_y: int) -> tuple[np.ndarray, np.ndarray]:
     Returns:
         tuple[np.ndarray, np.ndarray]: The weights and biases of the neural network.
     """
-    w = np.random.randn((n_x, n_y))
+    w = np.zeros((n_x, n_y))
     b = np.random.randn(n_y)
     return w, b
 
@@ -116,7 +126,7 @@ def train_linear_model(
     w, b = initialize_parameters(x.shape[1], 1)
 
     # Initialize cost vector
-    cost_history = np.array([])
+    cost_history = np.empty(num_iterations)
 
     # Perform gradient descent
     for i in range(num_iterations):
@@ -133,14 +143,3 @@ def train_linear_model(
         w, b = update_parameters(w, b, dw, db, learning_rate)
 
     return w, b, cost_history
-
-
-def plot_cost_history(learning_rate: float, cost_history: np.ndarray, ax: axes) -> None:
-    """Plots the cost history on the given axes.
-
-    Args:
-        cost_history (np.ndarray): Array of cost values.
-        ax (axes): Axes object to plot on.
-    """
-    (line,) = ax.plot(len(cost_history), cost_history)
-    line.set_label(f"Learning rate: {learning_rate}")
