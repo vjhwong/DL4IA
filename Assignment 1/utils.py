@@ -18,13 +18,13 @@ def initialize_parameters(n_x: int, n_y: int) -> tuple[np.ndarray, np.ndarray]:
 
     Args:
         n_x (int): Number of input features.
-        n_y (int): Number of output classes.
+        n_y (int): Number of outputs (1 since its regression).
 
     Returns:
         tuple[np.ndarray, np.ndarray]: The weights and biases of the neural network.
     """
     w = np.zeros((n_x, n_y))
-    b = np.random.randn(n_y)
+    b = np.zeros(n_y)
     return w, b
 
 
@@ -69,8 +69,8 @@ def model_backward(
         tuple[np.ndarray, np.ndarray]: The gradients of the weights and biases.
     """
     m = x.shape[0]
-    dw = -2 / m * np.dot(x.T, (y - y_hat))
-    db = -2 / m * np.sum(y - y_hat)
+    dw = (-2 / m) * np.dot(x.T, (y - y_hat))
+    db = (-2 / m) * np.sum(y - y_hat)
     return dw, db
 
 
@@ -95,7 +95,7 @@ def update_parameters(
 
 
 def predict(x: np.ndarray, w: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """Predicts zi based on the corresponding input xi.
+    """Predicts yi based on the corresponding input xi.
 
     Args:
         x (np.ndarray): Input features.
