@@ -1,0 +1,11 @@
+name: DL4IA  # Name of the environment
+
+channels:
+  - pytorch  # PyTorch channel for installing PyTorch
+
+dependencies:
+  - python=3.11  # Python version
+  - pytorch  # PyTorch package (latest version for CUDA-enabled GPU, replace with specific version if needed)
+  - torchvision  # torchvision package (optional, for computer vision tasks)
+  - matplotlib  # Matplotlib package
+  - numpy  # NumPy package
