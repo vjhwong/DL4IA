@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from load_mnist import load_mnist
 import time
+import itertools
 
 np.random.seed(0)
 
@@ -32,11 +33,10 @@ class NeuralNetwork:
         }
 
         Note:
-        - The last layer is the output layer with softmax activation function.
+        - The last layer is assumed to be the output layer with softmax activation function.
         """
         self.model_architecture = model_architecture
         self.model_state = {}
-        self.number_of_images = 0
         self.train_cost = []
         self.test_cost = []
         self.train_accuracy = []
@@ -50,7 +50,6 @@ class NeuralNetwork:
             y_train (np.ndarray): Training labels
         """
 
-        self.number_of_images = X_train.shape[0]
         input_size = X_train.shape[1]
         n_classes = y_train.shape[1]
 
@@ -151,7 +150,7 @@ class NeuralNetwork:
                 f"Activation function {activation_function} not supported."
             )
 
-    def model_forward(self, X: np.ndarray) -> np.ndarray:
+    def model_forward(self, X: np.ndarray) -> None:
         """Performs the forward propagation.
 
         Args:
@@ -179,7 +178,6 @@ class NeuralNetwork:
             # Update feedforward data if layer is not the output layer
             if layer != "output_layer":
                 feedforward_input = self.model_state[layer]["activation_output"]
-        return self.model_state["output_layer"]["activation_output"]
 
     def sigmoid_backward(self, dA: np.ndarray, Z: np.ndarray) -> np.ndarray:
         """Sigmoid activation function backward pass.
@@ -245,7 +243,6 @@ class NeuralNetwork:
         Returns:
             tuple[np.ndarray, np.ndarray, np.ndarray]: Gradient of the input, gradient of the weights, gradient of the biases
         """
-        # m = linear_input.shape[1]
         dW = np.dot(dZ, linear_input.T)
         db = np.sum(dZ, axis=1, keepdims=True)
         dA_prev = np.dot(W.T, dZ)
@@ -357,32 +354,49 @@ class NeuralNetwork:
 
         return mini_batches
 
-    def plot_cost_iteration(self, iterations: int) -> None:
-        """Plots the cost vs. iteration.
+    def plot_cost_and_accuracy(self, title: str) -> None:
+        """Plots the cost and accuracy vs. iteration.
 
         Args:
+            title (str): Title of the plot
             iterations (int): Number of iterations
         """
-        plt.plot(range(iterations), self.train_cost, label="Train")
-        plt.plot(range(iterations), self.test_cost, label="Test")
-        plt.xlabel("Iterations")
-        plt.ylabel("Cost")
-        plt.title("Cost vs. Iteration")
-        plt.legend()
-        plt.show()
-
-    def plot_accuracy_iteration(self, iterations: int) -> None:
-        """Plots the accuracy vs. iteration.
-
-        Args:
-            iterations (int): Number of iterations
-        """
-        plt.plot(range(iterations), self.train_accuracy, label="Train")
-        plt.plot(range(iterations), self.test_accuracy, label="Test")
-        plt.xlabel("Iterations")
-        plt.ylabel("Accuracy")
-        plt.title("Accuracy vs. Iteration")
-        plt.legend()
+        lg = 13
+        md = 10
+        sm = 9
+        fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+        fig.suptitle(title, fontsize=lg)
+        x = range(1, len(self.train_cost) + 1)
+        axs[0].plot(
+            x, self.train_cost, label=f"Final train cost: {self.train_cost[-1]:.4f}"
+        )
+        axs[0].plot(
+            x, self.test_cost, label=f"Final test cost: {self.test_cost[-1]:.4f}"
+        )
+        axs[0].set_title("Costs", fontsize=md)
+        axs[0].set_xlabel("Iteration", fontsize=md)
+        axs[0].set_ylabel("Cost", fontsize=md)
+        axs[0].legend(fontsize=sm)
+        axs[0].tick_params(axis="both", labelsize=sm)
+        # Optionally use a logarithmic y-scale
+        # axs[0].set_yscale('log')
+        axs[0].grid(True, which="both", linestyle="--", linewidth=0.5)
+        axs[1].plot(
+            x,
+            self.train_accuracy,
+            label=f"Final train accuracy: {self.train_accuracy[-1]:.4f}%",
+        )
+        axs[1].plot(
+            x,
+            self.test_accuracy,
+            label=f"Final test accuracy: {self.test_accuracy[-1]:.4f}%",
+        )
+        axs[1].set_title("Accuracy", fontsize=md)
+        axs[1].set_xlabel("Iteration", fontsize=md)
+        axs[1].set_ylabel("Accuracy (%)", fontsize=sm)
+        axs[1].legend(fontsize=sm)
+        axs[1].tick_params(axis="both", labelsize=sm)
+        axs[1].grid(True, which="both", linestyle="--", linewidth=0.5)
         plt.show()
 
     def plot_weights(self) -> None:
@@ -390,11 +404,12 @@ class NeuralNetwork:
         weight_matrix = self.model_state["hidden_layer_1"]["W"]
         figsize = [9.5, 5]
         nrows, ncols = 2, 5
-        _, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize)
+        fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize)
         for counter, axi in enumerate(ax.flat):
             img = weight_matrix[counter, :].reshape((28, 28))
-            axi.imshow(img)
+            axi.imshow(img, cmap="gray")
             axi.set_title(str(counter))
+        fig.suptitle("Weights of the hidden_layer_1 layer", fontsize=15)
         plt.show()
 
     @measure_runtime
@@ -445,8 +460,9 @@ class NeuralNetwork:
                 print("Training completed!\n")
                 print(f"Final Train Accuracy: {str(self.train_accuracy[i])}")
                 print(f"Test Accuracy: {str(self.test_accuracy[i])}")
-        self.plot_cost_iteration(iterations)
-        self.plot_accuracy_iteration(iterations)
+        self.plot_cost_and_accuracy(
+            title=f"learning_rate: {learning_rate}, mini_batch_size: {mini_batch_size}, iterations: {iterations}"
+        )
 
 
 def main() -> None:
