@@ -452,11 +452,11 @@ class NeuralNetwork:
             self.model_forward(X_test)
             self.test_cost.append(np.mean(self.compute_cost(y_test), axis=0))
 
-            if i % 10 == 0:
-                print(f"Train Cost epoch {i+1}: {str(self.train_cost[i])}")
-            if i % 100 == 0 and i != 0:
-                print(f"Train Accuracy: {str(self.train_accuracy[i])}\n")
-            elif i == (iterations - 1):
+            print(
+                f"Epoch {i+1}/{iterations}, Train Loss: {self.train_cost[-1]:.4f}, Train Accuracy: {self.train_accuracy[-1]:.2f}%, Test Loss: {self.test_cost[-1]:.4f}, Test Accuracy: {self.test_accuracy[-1]:.2f}%"
+            )
+
+            if i == (iterations - 1):
                 print("Training completed!\n")
                 print(f"Final Train Accuracy: {str(self.train_accuracy[i])}")
                 print(f"Test Accuracy: {str(self.test_accuracy[i])}")
