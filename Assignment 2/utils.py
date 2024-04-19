@@ -453,7 +453,7 @@ class NeuralNetwork:
             self.test_cost.append(np.mean(self.compute_cost(y_test), axis=0))
 
             if i % 10 == 0:
-                print(f"Train Cost epoch {i}: {str(self.train_cost[i])}")
+                print(f"Train Cost epoch {i+1}: {str(self.train_cost[i])}")
             if i % 100 == 0 and i != 0:
                 print(f"Train Accuracy: {str(self.train_accuracy[i])}\n")
             elif i == (iterations - 1):
