@@ -20,7 +20,7 @@ def plot_learning_curves(
         train_accuracies (list[int]): List of training accuracies
         test_accuracies (list[int]): List of test accuracies
     """
-    plt.subplot(2, 1, 1)
+    plt.subplot(1, 2, 1)
     plt.plot(
         range(1, num_epochs + 1),
         train_losses,
@@ -36,7 +36,7 @@ def plot_learning_curves(
     plt.title("Training and Test Loss")
     plt.legend()
 
-    plt.subplot(2, 1, 2)
+    plt.subplot(1, 2, 2)
     plt.plot(
         range(1, num_epochs + 1),
         train_accuracies,
