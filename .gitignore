@@ -3,3 +3,5 @@ assignment template 2024
 */images
 data/
 *.zip
+venv/
+oryx-build-commands.txt

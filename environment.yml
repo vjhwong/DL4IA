@@ -9,3 +9,4 @@ dependencies:
   - torchvision  # torchvision package (optional, for computer vision tasks)
   - matplotlib  # Matplotlib package
   - numpy  # NumPy package
+  -imageio 
