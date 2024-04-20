@@ -21,7 +21,11 @@ def plot_learning_curves(
         train_accuracies (list[int]): List of training accuracies
         test_accuracies (list[int]): List of test accuracies
     """
-    fig, axs = plt.subplots(1, 2)
+    lg = 13
+    md = 10
+    sm = 9
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+    fig.suptitle(title, fontsize=lg)
 
     axs[0].plot(
         range(1, num_epochs + 1),
@@ -33,27 +37,30 @@ def plot_learning_curves(
         test_losses,
         label=f"Final test loss: {test_losses[-1]:.4f}",
     )
-    axs[0].set_xlabel("Epoch")
-    axs[0].set_ylabel("Loss")
-    axs[0].set_title("Training and Test Loss")
-    axs[0].legend()
+    axs[0].set_xlabel("Epoch", fontsize=md)
+    axs[0].set_ylabel("Loss", fontsize=md)
+    axs[0].set_title("Training and Test Loss", fontsize=md)
+    axs[0].legend(fontsize=sm)
+    axs[0].tick_params(labelsize=sm)
+    axs[0].grid(True, which="both", linestyle="--", linewidth=0.5)
 
     axs[1].plot(
         range(1, num_epochs + 1),
         train_accuracies,
-        label=f"Final train accuracy: {train_accuracies[-1]:.4f}",
+        label=f"Final train accuracy: {train_accuracies[-1]:.4f}%",
     )
     axs[1].plot(
         range(1, num_epochs + 1),
         test_accuracies,
-        label=f"Final test accuracy: {test_accuracies[-1]:.4f}",
+        label=f"Final test accuracy: {test_accuracies[-1]:.4f}%",
     )
-    axs[1].set_xlabel("Epoch")
-    axs[1].set_ylabel("Accuracy")
-    axs[1].set_title("Training and Test Accuracy")
-    axs[1].legend()
+    axs[1].set_xlabel("Epoch", fontsize=md)
+    axs[1].set_ylabel("Accuracy", fontsize=md)
+    axs[1].set_title("Training and Test Accuracy", fontsize=md)
+    axs[1].legend(fontsize=sm)
+    axs[1].tick_params(labelsize=sm)
+    axs[1].grid(True, which="both", linestyle="--", linewidth=0.5)
 
-    fig.suptitle(f"")
     plt.tight_layout()
     plt.show()
 
@@ -109,7 +116,7 @@ def train_neural_network(
             total_train += labels.size(0)
             correct_train += (predicted == torch.argmax(labels, dim=1)).sum().item()
 
-            # if (i + 1) % 100 == 0:
+            # if (i + 1) % 100 == 0:x
             #     print(
             #         f"Epoch {epoch+1}/{num_epochs}, Step {i+1}/{len(train_loader)}, Loss: {loss.item():.4f}"
             #     )
@@ -141,8 +148,7 @@ def train_neural_network(
         test_accuracies.append(100 * (correct_test / total_test))
 
         print(
-            f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_costs[
-                -1]:.4f}, Train Accuracy: {train_accuracies[-1]:.2f}%, Test Loss: {test_costs[-1]:.4f}, Test Accuracy: {test_accuracies[-1]:.2f}%"
+            f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_costs[-1]:.4f}, Train Accuracy: {train_accuracies[-1]:.2f}%, Test Loss: {test_costs[-1]:.4f}, Test Accuracy: {test_accuracies[-1]:.2f}%"
         )
 
     title = f"Learning rate: {optimizer.param_groups[0]['lr']}, Batch size: {train_loader.batch_size}, Optimizer: {type(optimizer).__name__}"
