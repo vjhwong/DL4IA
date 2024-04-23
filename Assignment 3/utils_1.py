@@ -103,7 +103,7 @@ def train_neural_network(
         num_epochs (int): Number of epochs
         device (torch.device): Device to run the model on
     """
-    start = time.time()
+    start_time = time.time()
     train_costs = []
     train_accuracies = []
     test_costs = []
@@ -164,8 +164,8 @@ def train_neural_network(
         print(
             f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_costs[-1]:.4f}, Test Loss: {test_costs[-1]:.4f}, Train Accuracy: {train_accuracies[-1]:.2f}%, Test Accuracy: {test_accuracies[-1]:.2f}%"
         )
-    end_time = time.time()
-    title = f"{model_name}\nLearning rate: {optimizer.param_groups[0]['lr']}, Batch size: {train_loader.batch_size}, Optimizer: {type(optimizer).__name__}, Time: {end_time - start:.2f} seconds"
+    runtime = time.time() - start_time
+    title = f"{model_name}\nLearning rate: {optimizer.param_groups[0]['lr']} - Batch size: {train_loader.batch_size} - Optimizer: {type(optimizer).__name__} - Time: {runtime//60:.0f} min {runtime%60:.2f} s"
     plot_learning_curves(
         num_epochs, train_costs, test_costs, train_accuracies, test_accuracies, title
     )
