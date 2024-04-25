@@ -25,6 +25,7 @@ def load_warwick(
     test_images = []
     test_labels = []
 
+    # Load images and labels
     for image_path in sorted(
         glob.glob("../data/WARWICK/WARWICK" + "/Train/image_*.png")
     ):
@@ -47,6 +48,7 @@ def load_warwick(
         label = imageio.imread(label_path)
         test_labels.append(label)
 
+    # Normalize images and labels
     X_train = torch.tensor(
         np.array(train_images), dtype=torch.float, requires_grad=True
     ).permute(0, 3, 1, 2)
@@ -59,7 +61,10 @@ def load_warwick(
     return X_train.to(device), Y_train.to(device), X_test.to(device), Y_test.to(device)
 
 
-def dice_coefficient(outputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+def dice_coefficient(
+    outputs: torch.Tensor,
+    targets: torch.Tensor,
+) -> torch.Tensor:
     """Compute the Dice coefficient.
 
     Args:
@@ -69,10 +74,18 @@ def dice_coefficient(outputs: torch.Tensor, targets: torch.Tensor) -> torch.Tens
     Returns:
         torch.Tensor: Dice coefficient
     """
-    eps = 1e-8
-    intersection = torch.sum(abs(outputs) * abs(targets))
-    union = torch.sum(outputs) + torch.sum(targets)
-    return (2.0 * intersection) / abs(union + eps)
+    # Flatten outputs and targets
+    batch_size = outputs.size(0)
+    outputs_flat = outputs.view(batch_size, -1)
+    targets_flat = targets.view(batch_size, -1)
+
+    # Calculate intersection and union
+    intersection = (outputs_flat * targets_flat).sum(1)
+    unionset = outputs_flat.sum(1) + targets_flat.sum(1)
+
+    # Calculate Dice coefficient
+    dice = 2 * (intersection) / (unionset + 1e-8)
+    return dice.sum() / batch_size
 
 
 def training_curve_plot(
@@ -95,6 +108,8 @@ def training_curve_plot(
     sm = 9
     fig, axs = plt.subplots(1, 2, figsize=(12, 4))
     fig.suptitle(title, fontsize=md)
+
+    # Plot the training and test losses
     x = range(1, len(train_losses) + 1)
     axs[0].plot(x, train_losses, label=f"Final train cost: {train_losses[-1]:.4f}")
     axs[0].plot(x, test_losses, label=f"Final test cost: {test_losses[-1]:.4f}")
@@ -103,9 +118,9 @@ def training_curve_plot(
     axs[0].set_ylabel("Cost", fontsize=md)
     axs[0].legend(fontsize=sm)
     axs[0].tick_params(axis="both", labelsize=sm)
-    # Optionally use a logarithmic y-scale
-    # axs[0].set_yscale('log')
     axs[0].grid(True, which="both", linestyle="--", linewidth=0.5)
+
+    # Plot the training and test accuracy
     axs[1].plot(
         x, train_accuracy, label=f"Final train Dice score: {train_accuracy[-1]:.4f}"
     )
@@ -155,6 +170,7 @@ def train_segmentation_network(
         train_loss = 0
         train_dice = 0
 
+        # Train the model
         for images, labels in train_loader:
             images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
@@ -176,6 +192,7 @@ def train_segmentation_network(
         test_loss = 0
         test_dice = 0
 
+        # Test the model
         with torch.no_grad():
             for images, labels in test_loader:
                 images, labels = images.to(device), labels.to(device)
@@ -239,10 +256,12 @@ def find_best_and_worst_case(
             inputs = inputs.to(device)
             labels = labels.to(device)
 
+            # Forward pass
             outputs = model(inputs)
-
+            outputs = (outputs > 0.5).float()
             performance = dice_coefficient(outputs, labels)
 
+            # Update best or worst case
             if performance > best_case["performance"]:
                 best_case["input"] = inputs
                 best_case["label"] = labels
@@ -250,7 +269,7 @@ def find_best_and_worst_case(
                 best_case["performance"] = performance
                 best_case["index"] = index
 
-            if performance < worst_case["performance"]:
+            elif performance < worst_case["performance"]:
                 worst_case["input"] = inputs
                 worst_case["label"] = labels
                 worst_case["output"] = outputs
@@ -262,12 +281,23 @@ def find_best_and_worst_case(
 def visualize_case(
     case: dict[str : torch.Tensor | float | int], device: torch.device, name: str
 ) -> None:
+    """Visualize a case.
+
+    Args:
+        case (dict[str : torch.Tensor | float | int]): Case to visualize
+        device (torch.device): Device to run the model on
+        name (str): Name of the case
+    """
     fontsize = 16
+
+    # Convert tensors to numpy arrays
     image = case["input"].detach().cpu().permute(1, 2, 0).numpy().astype("uint8")
     mask = case["label"].detach().cpu()
-    prediction = 255 - case["output"].unsqueeze(0).to(
-        device
-    ).detach().cpu().numpy().astype("uint8")
+    prediction = (
+        case["output"].unsqueeze(0).to(device).detach().cpu().numpy().astype("uint8")
+    )
+
+    # Plot the image, mask, and prediction
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     fig.suptitle(f"{name} - Dice score: {case['performance']:.4f}\n", fontsize=fontsize)
 
@@ -282,5 +312,6 @@ def visualize_case(
     axes[2].imshow(prediction.squeeze(), cmap="gray")
     axes[2].set_title("Predicted Mask", fontsize=fontsize)
     axes[2].axis("off")
+
     plt.tight_layout()
     plt.show()

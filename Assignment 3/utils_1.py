@@ -3,13 +3,25 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import time
-import numpy as np
-import imageio.v2 as imageio
-import glob
+from typing import Callable
 
 
-def measure_runtime(func):
+def measure_runtime(func: Callable) -> Callable:
+    """Decorator to measure the runtime of a function.
+
+    Args:
+        func (Callable): Function to measure the runtime of
+
+    Returns:
+        Callable: Wrapper function that measures the runtime of the input function
+    """
+
     def wrapper(*args, **kwargs):
+        """Wrapper function that measures the runtime of the input function.
+
+        Returns:
+            _type_: Result of the input function
+        """
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
@@ -171,7 +183,9 @@ def train_neural_network(
     )
 
 
-def compute_confusion_matrix(predictions: torch.Tensor, true_labels: torch.Tensor):
+def compute_confusion_matrix(
+    predictions: torch.Tensor, true_labels: torch.Tensor
+) -> torch.Tensor:
     """Compute the confusion matrix for a set of predictions and true labels.
 
     Args:
